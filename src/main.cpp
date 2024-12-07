@@ -7,7 +7,7 @@
  * Signal      Pin          Pin
  * ------------------------------------
  * RST/Reset   RST          5
- * SPI SS      SDA(SS)      15
+ * SPI SS      SDA(NSS)     15
  * SPI MOSI    MOSI         13
  * SPI MISO    MISO         19
  * SPI SCK     SCK          18
@@ -16,10 +16,10 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH1106.h>
+#include <Fonts/FreeMono9pt7b.h>
 #include <MFRC522.h>
 #include <SPI.h>
 #include <Wire.h>
-#include <Fonts/FreeMono9pt7b.h>
 
 #define SS_PIN 15
 #define RST_PIN 5
@@ -31,6 +31,8 @@ String cardUID;
 #define OLED_SCL 22
 #define i2C_ADDRESS 0x3C
 Adafruit_SH1106 display;
+
+#define pinRelais 2
 
 String get_byte_array(byte *buffer, byte bufferSize) {
     String data;
@@ -54,6 +56,9 @@ void setup() {
     Serial.begin(115200);
     SPI.begin();
 
+    pinMode(pinRelais, OUTPUT);
+    digitalWrite(pinRelais, LOW);
+
     // Init MFRC522
     mfrc522.PCD_Init();
 
@@ -72,7 +77,6 @@ void setup() {
 }
 
 void loop() {
-    
     if (!mfrc522.PICC_IsNewCardPresent())
         return;
 
@@ -85,10 +89,13 @@ void loop() {
     if (newCardUID != cardUID) {
         cardUID = newCardUID;
         displayCardUID(cardUID);
+        digitalWrite(pinRelais, HIGH);
+        delay(1000);
+        digitalWrite(pinRelais, LOW);
         Serial.print("new card UID: " + cardUID);
         Serial.println();
         Serial.print(F("PICC type: "));
         MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
         Serial.println(mfrc522.PICC_GetTypeName(piccType));
-    }    
+    }
 }
