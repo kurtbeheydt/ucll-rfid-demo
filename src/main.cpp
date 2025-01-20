@@ -37,7 +37,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 #define i2C_ADDRESS 0x3C
 Adafruit_SH1106 display;
 
-#define pinRelais 2  // Pin to control the relay
+#define pinRelay 2  // Pin to control the relay
 String cardUID;      // Variable to store the UID of the read card
 
 /**
@@ -78,8 +78,8 @@ void setup() {
     Serial.begin(115200);
     SPI.begin();
 
-    pinMode(pinRelais, OUTPUT);
-    digitalWrite(pinRelais, LOW);
+    pinMode(pinRelay, OUTPUT);
+    digitalWrite(pinRelay, LOW);
 
     // Init MFRC522
     mfrc522.PCD_Init();
@@ -118,8 +118,8 @@ void loop() {
         Serial.println(mfrc522.PICC_GetTypeName(piccType));
 
         // Always open relay for 1 second when a new card is detected
-        digitalWrite(pinRelais, HIGH);
+        digitalWrite(pinRelay, HIGH);
         delay(1000);
-        digitalWrite(pinRelais, LOW);
+        digitalWrite(pinRelay, LOW);
     }
 }
