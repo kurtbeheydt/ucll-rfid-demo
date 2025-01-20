@@ -1,6 +1,15 @@
+#include <Adafruit_GFX.h>
+#include <Adafruit_SH1106.h>
 #include <Arduino.h>
+#include <Fonts/FreeMono9pt7b.h>
+#include <MFRC522.h>
+#include <SPI.h>
+#include <Wire.h>
 
 /**
+ *
+ * RFID-RC522 shield
+ *
  * Pin layout used:
  * ------------------------------------
  *             MFRC522      ESP32
@@ -14,26 +23,30 @@
  *
  */
 
-#include <Adafruit_GFX.h>
-#include <Adafruit_SH1106.h>
-#include <Fonts/FreeMono9pt7b.h>
-#include <MFRC522.h>
-#include <SPI.h>
-#include <Wire.h>
-
 #define SS_PIN 15
 #define RST_PIN 5
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-String cardUID;
+/**
+ * oled display
+ *
+ */
 
 #define OLED_SDA 21
 #define OLED_SCL 22
 #define i2C_ADDRESS 0x3C
 Adafruit_SH1106 display;
 
-#define pinRelais 2
+#define pinRelais 2  // Pin to control the relay
+String cardUID;      // Variable to store the UID of the read card
 
+/**
+ * @brief Get the byte array object from the buffer
+ *
+ * @param buffer
+ * @param bufferSize
+ * @return String
+ */
 String get_byte_array(byte *buffer, byte bufferSize) {
     String data;
 
@@ -44,6 +57,11 @@ String get_byte_array(byte *buffer, byte bufferSize) {
     return data;
 }
 
+/**
+ * @brief Display the card UID on the OLED display
+ *
+ * @param cardUID
+ */
 void displayCardUID(String cardUID) {
     display.clearDisplay();
     display.setCursor(0, 10);
@@ -52,6 +70,10 @@ void displayCardUID(String cardUID) {
     display.display();
 }
 
+/**
+ * @brief main setup function
+ *
+ */
 void setup() {
     Serial.begin(115200);
     SPI.begin();
@@ -72,7 +94,7 @@ void setup() {
     display.println("RFID Reader");
     display.display();
 
-    Serial.println("Approach your reader card...");
+    Serial.println("Started, waiting for card ...");
     Serial.println();
 }
 
@@ -86,16 +108,18 @@ void loop() {
 
     String newCardUID = get_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
 
-    if (newCardUID != cardUID) {
+    if (newCardUID != cardUID) {  // If new card is found ...
         cardUID = newCardUID;
         displayCardUID(cardUID);
-        digitalWrite(pinRelais, HIGH);
-        delay(1000);
-        digitalWrite(pinRelais, LOW);
         Serial.print("new card UID: " + cardUID);
         Serial.println();
         Serial.print(F("PICC type: "));
         MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
         Serial.println(mfrc522.PICC_GetTypeName(piccType));
+
+        // Always open relay for 1 second when a new card is detected
+        digitalWrite(pinRelais, HIGH);
+        delay(1000);
+        digitalWrite(pinRelais, LOW);
     }
 }
