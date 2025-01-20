@@ -38,7 +38,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 Adafruit_SH1106 display;
 
 #define pinRelay 2  // Pin to control the relay
-String cardUID;      // Variable to store the UID of the read card
+String cardUID;      // Variable to store the UID of the last card
 
 /**
  * @brief Get the byte array object from the buffer
