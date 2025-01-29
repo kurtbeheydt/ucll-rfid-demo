@@ -1,11 +1,17 @@
 # demo code rfid - esp32 - oledSH1106
 
+![demo](demo.jpg)
+
 ## Hardware
 
 - esp32
 - oled I2C (SH1106 chip)
 - mfrc522
+- relay
 
+## esp32 pinout
+
+![esp32](ESP32-Pinout.png)
 
 ## Pin layout mfrc522
 ```
